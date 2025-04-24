@@ -1,0 +1,5 @@
+streamlit
+jinja2
+pdfkit
+reportlab  # optional for PDF gen
+pillow
