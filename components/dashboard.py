@@ -1,49 +1,62 @@
-import os
-from dotenv import load_dotenv
-from passlib.context import CryptContext
-from datetime import datetime, timedelta
-import jwt
+# components/dashboard.py
 
-# Load environment variables from .env file
-load_dotenv()
+import streamlit as st
+from datetime import datetime
 
-# Secret key and JWT configuration
-SECRET_KEY = os.getenv("SECRET_KEY", "your_default_secret_key")  # Use a default if .env is missing
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60  # Token expiration time (in minutes)
+def dashboard_ui():
+    st.markdown("""
+        <div style='text-align: center; margin-bottom: 3rem;'>
+            <h1 style='color: #00ffea; font-family: Orbitron;'>📂 Dashboard</h1>
+            <p style='color: #888;'>Your hacker workspace is live</p>
+        </div>
+    """, unsafe_allow_html=True)
 
-# Password hashing configuration
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    st.markdown("""
+        <div style="display:flex; justify-content: center; margin-bottom: 2rem;">
+            <button onclick="document.getElementById('create_btn').click()" style='
+                padding: 1em 2em;
+                background: linear-gradient(to right, #4a00e0, #00f7ff);
+                color: white;
+                font-size: 1em;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                box-shadow: 0 0 15px #00f7ff;
+                transition: 0.3s;
+            '>➕ Create New Resume</button>
+        </div>
+    """, unsafe_allow_html=True)
 
-def hash_password(password: str) -> str:
-    """
-    Hashes a plain text password using bcrypt.
-    """
-    return pwd_context.hash(password)
+    # Streamlit native button (for logic)
+    if st.button("Create New Resume", key="create_btn"):
+        st.session_state.page = "resume_builder"
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """
-    Verifies if a plain password matches the hashed password.
-    """
-    return pwd_context.verify(plain_password, hashed_password)
+    st.markdown("---")
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
-    """
-    Generates a JWT access token with an expiration time.
-    """
-    to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    st.markdown("<h3 style='color:#00ffc8;'>📝 Recent Resumes</h3>", unsafe_allow_html=True)
 
-def decode_access_token(token: str) -> dict:
-    """
-    Decodes a JWT access token and returns the payload.
-    """
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload
-    except jwt.ExpiredSignatureError:
-        raise ValueError("Token has expired")
-    except jwt.InvalidTokenError:
-        raise ValueError("Invalid token")
+    # Mock Data (replace with DB later)
+    resumes = [
+        {"title": "Full Stack Dev", "date": "2025-04-20", "score": "87%"},
+        {"title": "Data Analyst", "date": "2025-03-18", "score": "91%"},
+        {"title": "Cybersecurity Intern", "date": "2025-02-05", "score": "84%"}
+    ]
+
+    for res in resumes:
+        st.markdown(f"""
+            <div style='
+                background-color: #1a1a1a;
+                padding: 1rem;
+                border-left: 4px solid #00f7ff;
+                margin-bottom: 1rem;
+                border-radius: 10px;
+            '>
+                <strong style='color:#0ff;'>{res['title']}</strong><br>
+                <small style='color:#ccc;'>Created on: {res['date']} | ATS Score: {res['score']}</small>
+            </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+    if st.button("🚪 Logout"):
+        st.session_state.page = "login"
+        st.success("Logged out successfully.")
